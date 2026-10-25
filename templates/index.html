@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TrustScore — Fake Account Detector</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">🛡️</span>
+        <span class="logo-text">TrustScore<span class="logo-ai">AI</span></span>
+      </div>
+      <p class="header-tagline">Fake Account & Spam Detection System</p>
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- HERO -->
+    <section class="hero">
+      <h1>Detect Fake Accounts Instantly</h1>
+      <p>Powered by machine learning trained on real social media data. Get a trust score and risk analysis in seconds.</p>
+      <div class="platform-tabs">
+        <button class="tab-btn active" data-platform="instagram" onclick="switchPlatform('instagram')">
+          <span>📸</span> Instagram
+        </button>
+        <button class="tab-btn" data-platform="facebook" onclick="switchPlatform('facebook')">
+          <span>📘</span> Facebook
+        </button>
+      </div>
+    </section>
+
+    <div class="content-grid">
+
+      <!-- LEFT: FORM -->
+      <div class="card form-card">
+        <h2 class="card-title">Account Details</h2>
+        <p class="card-subtitle" id="form-subtitle">Enter the Instagram account's public metrics below</p>
+
+        <!-- INSTAGRAM FORM -->
+        <div id="instagram-form" class="platform-form">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Profile Picture</label>
+              <div class="toggle-group">
+                <button class="toggle-btn active" data-val="1" onclick="setToggle(this,'profile_pic')">✅ Has Photo</button>
+                <button class="toggle-btn" data-val="0" onclick="setToggle(this,'profile_pic')">❌ No Photo</button>
+              </div>
+              <input type="hidden" id="profile_pic" value="1">
+            </div>
+            <div class="form-group">
+              <label>Account Type</label>
+              <div class="toggle-group">
+                <button class="toggle-btn" data-val="1" onclick="setToggle(this,'private')">🔒 Private</button>
+                <button class="toggle-btn active" data-val="0" onclick="setToggle(this,'private')">🌐 Public</button>
+              </div>
+              <input type="hidden" id="private" value="0">
+            </div>
+            <div class="form-group">
+              <label>External URL in Bio</label>
+              <div class="toggle-group">
+                <button class="toggle-btn active" data-val="0" onclick="setToggle(this,'external_url')">❌ No URL</button>
+                <button class="toggle-btn" data-val="1" onclick="setToggle(this,'external_url')">🔗 Has URL</button>
+              </div>
+              <input type="hidden" id="external_url" value="0">
+            </div>
+            <div class="form-group">
+              <label>Name = Username?</label>
+              <div class="toggle-group">
+                <button class="toggle-btn active" data-val="0" onclick="setToggle(this,'name_eq_username')">❌ Different</button>
+                <button class="toggle-btn" data-val="1" onclick="setToggle(this,'name_eq_username')">✅ Same</button>
+              </div>
+              <input type="hidden" id="name_eq_username" value="0">
+            </div>
+
+            <div class="form-group full-width">
+              <label>Numbers in Username <span class="hint">(ratio 0.0–1.0, e.g. user123 → 0.33)</span></label>
+              <div class="slider-row">
+                <input type="range" id="nums_length_username_slider" min="0" max="1" step="0.01" value="0.1"
+                  oninput="syncSlider('nums_length_username', this.value)">
+                <input type="number" id="nums_length_username" class="num-input" value="0.1" min="0" max="1" step="0.01"
+                  oninput="syncSlider('nums_length_username_slider', this.value)">
+              </div>
+            </div>
+            <div class="form-group full-width">
+              <label>Numbers in Full Name <span class="hint">(ratio 0.0–1.0)</span></label>
+              <div class="slider-row">
+                <input type="range" id="nums_length_fullname_slider" min="0" max="1" step="0.01" value="0"
+                  oninput="syncSlider('nums_length_fullname', this.value)">
+                <input type="number" id="nums_length_fullname" class="num-input" value="0" min="0" max="1" step="0.01"
+                  oninput="syncSlider('nums_length_fullname_slider', this.value)">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Words in Full Name</label>
+              <input type="number" id="fullname_words" class="input-field" value="2" min="0" max="10">
+            </div>
+            <div class="form-group">
+              <label>Bio / Description Length</label>
+              <input type="number" id="description_length" class="input-field" value="50" min="0" max="500">
+            </div>
+            <div class="form-group">
+              <label># Followers</label>
+              <input type="number" id="followers" class="input-field" value="500" min="0">
+            </div>
+            <div class="form-group">
+              <label># Following</label>
+              <input type="number" id="following" class="input-field" value="300" min="0">
+            </div>
+            <div class="form-group full-width">
+              <label># Posts</label>
+              <input type="number" id="posts" class="input-field" value="25" min="0">
+            </div>
+          </div>
+        </div>
+
+        <!-- FACEBOOK FORM -->
+        <div id="facebook-form" class="platform-form" style="display:none">
+          <div class="form-grid">
+            <div class="form-group">
+              <label># Friends</label>
+              <input type="number" id="friends" class="input-field" value="150" min="0">
+            </div>
+            <div class="form-group">
+              <label># Following</label>
+              <input type="number" id="fb_following" class="input-field" value="200" min="0">
+            </div>
+            <div class="form-group">
+              <label># Community Members</label>
+              <input type="number" id="community" class="input-field" value="50" min="0">
+            </div>
+            <div class="form-group">
+              <label>Account Age (days)</label>
+              <input type="number" id="age" class="input-field" value="365" min="0">
+            </div>
+            <div class="form-group">
+              <label># Posts Shared</label>
+              <input type="number" id="postshared" class="input-field" value="100" min="0">
+            </div>
+            <div class="form-group">
+              <label># URLs Shared</label>
+              <input type="number" id="urlshared" class="input-field" value="30" min="0">
+            </div>
+            <div class="form-group">
+              <label># Photos / Videos</label>
+              <input type="number" id="photos_videos" class="input-field" value="50" min="0">
+            </div>
+            <div class="form-group">
+              <label>Tags per Post</label>
+              <input type="number" id="tags_post" class="input-field" value="5" min="0">
+            </div>
+            <div class="form-group">
+              <label># Unique Tags Used</label>
+              <input type="number" id="num_tags" class="input-field" value="10" min="0">
+            </div>
+            <div class="form-group">
+              <label>Likes per Post</label>
+              <input type="number" id="likes_post" class="input-field" value="1.5" step="0.1" min="0">
+            </div>
+            <div class="form-group full-width">
+              <label>Avg Comments per Post</label>
+              <input type="number" id="avgcomment" class="input-field" value="0.5" step="0.01" min="0">
+            </div>
+            <div class="form-group full-width">
+              <label>URL-Only Posts Ratio <span class="hint">(0.0–1.0)</span></label>
+              <div class="slider-row">
+                <input type="range" id="fpurls_slider" min="0" max="1" step="0.01" value="0.2"
+                  oninput="syncSlider('fpurls', this.value)">
+                <input type="number" id="fpurls" class="num-input" value="0.2" min="0" max="1" step="0.01"
+                  oninput="syncSlider('fpurls_slider', this.value)">
+              </div>
+            </div>
+            <div class="form-group full-width">
+              <label>Photo/Video-Only Posts Ratio <span class="hint">(0.0–1.0)</span></label>
+              <div class="slider-row">
+                <input type="range" id="fpphotos_slider" min="0" max="1" step="0.01" value="0.5"
+                  oninput="syncSlider('fpphotos', this.value)">
+                <input type="number" id="fpphotos" class="num-input" value="0.5" min="0" max="1" step="0.01"
+                  oninput="syncSlider('fpphotos_slider', this.value)">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button class="analyze-btn" onclick="analyze()">
+          <span id="btn-text">🔍 Analyze Account</span>
+          <span id="btn-spinner" style="display:none">⏳ Analyzing...</span>
+        </button>
+      </div>
+
+      <!-- RIGHT: RESULTS -->
+      <div class="results-col">
+
+        <!-- SCORE CARD -->
+        <div class="card score-card" id="score-card">
+          <div class="score-placeholder" id="score-placeholder">
+            <div class="placeholder-icon">🔍</div>
+            <p>Fill in the account details and click <strong>Analyze Account</strong> to get the trust score and risk analysis.</p>
+          </div>
+          <div id="score-result" style="display:none">
+            <div class="score-header">
+              <div class="verdict-badge" id="verdict-badge">—</div>
+              <h3>Trust Score</h3>
+            </div>
+            <div class="gauge-container">
+              <svg viewBox="0 0 200 120" class="gauge-svg">
+                <defs>
+                  <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:#ef4444"/>
+                    <stop offset="50%" style="stop-color:#f59e0b"/>
+                    <stop offset="100%" style="stop-color:#22c55e"/>
+                  </linearGradient>
+                </defs>
+                <path d="M 15 105 A 85 85 0 0 1 185 105" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/>
+                <path id="gauge-arc" d="M 15 105 A 85 85 0 0 1 185 105" fill="none" stroke="url(#gaugeGrad)" stroke-width="14" stroke-linecap="round" stroke-dasharray="267" stroke-dashoffset="267"/>
+                <text x="100" y="90" text-anchor="middle" id="gauge-score-text" class="gauge-score-text">—</text>
+                <text x="100" y="108" text-anchor="middle" class="gauge-label-text">/ 100</text>
+                <text x="15" y="118" text-anchor="middle" class="gauge-end-label">0</text>
+                <text x="185" y="118" text-anchor="middle" class="gauge-end-label">100</text>
+              </svg>
+            </div>
+            <div class="prob-bars">
+              <div class="prob-bar-item">
+                <div class="prob-bar-label">
+                  <span>🟢 Real Account</span>
+                  <span id="prob-real-pct">—</span>
+                </div>
+                <div class="prob-bar-bg">
+                  <div class="prob-bar-fill real-fill" id="prob-real-bar"></div>
+                </div>
+              </div>
+              <div class="prob-bar-item">
+                <div class="prob-bar-label">
+                  <span>🔴 Fake Account</span>
+                  <span id="prob-fake-pct">—</span>
+                </div>
+                <div class="prob-bar-bg">
+                  <div class="prob-bar-fill fake-fill" id="prob-fake-bar"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RISK FLAGS -->
+        <div class="card risk-card" id="risk-card" style="display:none">
+          <h3 class="card-title">⚠️ Risk Analysis</h3>
+          <div id="risk-flags-list"></div>
+        </div>
+
+        <!-- FEATURE IMPORTANCE -->
+        <div class="card importance-card">
+          <h3 class="card-title">📊 Model Feature Importance</h3>
+          <p class="card-subtitle" id="importance-subtitle">Top factors used by the AI model</p>
+          <div id="importance-bars"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="card history-card">
+      <div class="history-header">
+        <h3 class="card-title">📋 Analysis History</h3>
+        <button class="clear-btn" onclick="clearHistory()">Clear</button>
+      </div>
+      <div id="history-list">
+        <p class="empty-history">No analyses yet. Run your first check above!</p>
+      </div>
+    </div>
+
+      </main>
+
+  <footer class="footer">
+    <p>TrustScore AI — Fake Account Detection System &copy; 2025 | Machine Learning Project</p>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  <script>
+    // Inject feature importances from Flask into JS
+    const IG_IMPORTANCES = {{ ig_importances | tojson }};
+    const FB_IMPORTANCES = {{ fb_importances | tojson }};
+    renderImportanceBars('instagram');
+  </script>
+</body>
+</html>
